@@ -3,6 +3,8 @@ from PIL import Image, ImageDraw, ImageFont
 from image_settings import *
 
 LEFT_MARGIN = 38
+MAX_TITLE_LEN = 27
+MAX_LOCATION_LEN = 50
 
 
 def draw_text(image, title, phone, location, is_active, rating):
@@ -12,9 +14,13 @@ def draw_text(image, title, phone, location, is_active, rating):
     text_color = (118, 118, 118, 255)
     text_position = (LEFT_MARGIN, LEFT_MARGIN)
     font = ImageFont.truetype(ROBOTO_MEDIUM_PATH, 42)
+    if len(title) >= MAX_TITLE_LEN:
+        cut_title = title[:MAX_TITLE_LEN - 3] + '...'
+    else:
+        cut_title = title
     draw.text(
         text_position,
-        title,
+        cut_title,
         font=font,
         fill=text_color
     )
@@ -22,19 +28,23 @@ def draw_text(image, title, phone, location, is_active, rating):
     text_color = (118, 118, 118, 255)
     text_position = (LEFT_MARGIN, 97)
     font = ImageFont.truetype(ROBOTO_REGULAR_PATH, 24)
+    if len(location) >= MAX_LOCATION_LEN:
+        cut_location = location[:MAX_LOCATION_LEN - 3] + '...'
+    else:
+        cut_location = location
     draw.text(
         text_position,
-        location,
+        cut_location,
         font=font,
         fill=text_color
     )
     # Рейтинг
     text_color = (118, 118, 118, 255)
-    text_position = (237, 140)
+    text_position = (237, 143)
     font = ImageFont.truetype(ROBOTO_REGULAR_PATH, 24)
     draw.text(
         text_position,
-        str(rating),
+        str(rating) if rating else '–',
         font=font,
         fill=text_color
     )
