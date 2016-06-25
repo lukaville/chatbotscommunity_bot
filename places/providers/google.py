@@ -6,7 +6,7 @@ SEARCH_RADIUS = 20000
 
 PLACES_API_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?key={key}&location={lat}%2C{lng}&query={query}&language=ru&radius={radius}"
 PLACE_DETAIL_API_URL = "https://maps.googleapis.com/maps/api/place/details/json?placeid={place_id}&key={key}&language=ru"
-PLACE_LIMIT = 3
+PLACE_LIMIT = 2
 
 class GooglePlacesProvider(BasePlacesProvider):
     def __init__(self, api_key):
