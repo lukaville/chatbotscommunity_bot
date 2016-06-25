@@ -56,6 +56,8 @@ def inlinequery(bot, update):
         if place.get('url'):
             google_map_url = InlineKeyboardButton(text='На карте', url=place['url'])
             keyboard[0].append(google_map_url)
+        if place.get('formatted_phone_number'):
+            phone_link = InlineKeyboardButton(text='На карте', url='tel:' + place['formatted_phone_number'])
         opening_hours = place.get('opening_hours')
         is_opened = True
         if opening_hours:
