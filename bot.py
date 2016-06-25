@@ -4,10 +4,12 @@ from uuid import uuid4
 
 import re
 
+import image_handler
 from places.places import get_places
 from telegram import InlineQueryResultArticle, ParseMode, \
     InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater, InlineQueryHandler, CommandHandler, ChosenInlineResultHandler
+from imgurpython import ImgurClient
 import logging
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -25,7 +27,7 @@ def escape_markdown(text):
     return re.sub(r'([%s])' % escape_chars, r'\\\1', text)
 
 
-def format_response(response_object):
+def format_response(response_object, image):
     response = ('*{name}* \n'
                 'Адрес: {address} \n'
                 'Рейтинг: {rating} \n').format(name=response_object.get('name'),
@@ -34,8 +36,9 @@ def format_response(response_object):
     opening_hours = response_object.get('opening_hours')
     is_opened = ''
     if opening_hours:
-        is_opened = 'Открыто' if opening_hours.get('open_now') else 'Закрыто'
-    return response + is_opened
+        is_opened = 'Открыто \n' if opening_hours.get('open_now') else 'Закрыто \n'
+    link = image.get('link')
+    return response + is_opened + link
 
 
 def inlinequery(bot, update):
@@ -53,12 +56,30 @@ def inlinequery(bot, update):
         if place.get('url'):
             google_map_url = InlineKeyboardButton(text='На карте', url=place['url'])
             keyboard[0].append(google_map_url)
+        opening_hours = place.get('opening_hours')
+        is_opened = True
+        if opening_hours:
+            is_opened = opening_hours.get('open_now')
+
+        image_handler.handle_image(
+            title=place.get('name'),
+            location=place.get('formatted_address'),
+            phone=place.get('formatted_phone_number'),
+            is_active=is_opened,
+            rating=place.get('rating')
+        )
+        client = ImgurClient(
+            os.getenv('IMGUR_CLIENT_ID'),
+            os.getenv('IMGUR_CLIENT_SECRET')
+        )
+        resp = client.upload_from_path('resources/output/temp.png')
+
         if keyboard[0]:
             results.append(InlineQueryResultArticle(id=uuid4(),
                                                     title=place.get('name'),
                                                     description=place.get('formatted_address'),
                                                     input_message_content=InputTextMessageContent(
-                                                        format_response(place),
+                                                        format_response(place, resp),
                                                         parse_mode=ParseMode.MARKDOWN),
                                                     reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard),
                                                     thumb_url=place.get('icon')
@@ -88,7 +109,7 @@ def main():
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(InlineQueryHandler(inlinequery))
-    dp.add_handler(ChosenInlineResultHandler(inlinequery))
+    dp.add_handler(ChosenInlineResultHandler(appendimage))
 
     # log all errors
     dp.add_error_handler(error)
