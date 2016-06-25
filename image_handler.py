@@ -82,7 +82,6 @@ def handle_image(title, location, phone, is_active, rating):
     image = Image.open(CARD_PATH).convert('RGBA')
     image = draw_text(image, title, phone, location, is_active, rating)
     image = draw_stars(image, rating)
-    image.show()
     image.save(OUTPUT_PATH, quality=100, optimize=True, progressive=True)
 
 
