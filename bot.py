@@ -64,7 +64,7 @@ def inlinequery(bot, update):
         image_handler.handle_image(
             title=place.get('name'),
             location=place.get('formatted_address'),
-            phone=place.get('formatted_phone'),
+            phone=place.get('formatted_phone_number'),
             is_active=is_opened,
             rating=place.get('rating')
         )
