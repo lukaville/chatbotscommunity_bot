@@ -28,10 +28,14 @@ def escape_markdown(text):
 def format_response(response_object):
     response = ('*{name}* \n'
                 'Адрес: {address} \n'
-                'Рейтинг: {rating}').format(name=response_object.get('name'),
-                                            address=response_object.get('formatted_address'),
-                                            rating=response_object.get('rating'))
-    return response
+                'Рейтинг: {rating} \n').format(name=response_object.get('name'),
+                                               address=response_object.get('formatted_address'),
+                                               rating=response_object.get('rating'))
+    opening_hours = response_object.get('opening_hours')
+    is_opened = ''
+    if opening_hours:
+        is_opened = 'Открыто' if opening_hours.get('open_now') else 'Закрыто'
+    return response + is_opened
 
 
 def inlinequery(bot, update):
@@ -41,26 +45,29 @@ def inlinequery(bot, update):
 
     places = get_places(query, lat=query_object.location.latitude, lng=query_object.location.longitude)
     for place in places:
-        google_map_url = InlineKeyboardButton(text='На карте', url=place['url'])
+        keyboard = [[], []]
         if place.get('website'):
             website = InlineKeyboardButton(text='Сайт', url=place['website'])
-            keyboard = [[google_map_url, website]]
-        else:
-            keyboard = [[google_map_url, ]]
-        results.append(InlineQueryResultArticle(id=uuid4(),
-                                                title=place.get('name'),
-                                                description=place.get('formatted_address'),
-                                                input_message_content=InputTextMessageContent(
-                                                    format_response(place),
-                                                    parse_mode=ParseMode.MARKDOWN),
-                                                reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard),
-                                                thumb_url=place.get('icon')
-                                                ))
+            keyboard[0].append(website)
+        if place.get('url'):
+            google_map_url = InlineKeyboardButton(text='На карте', url=place['url'])
+            keyboard[0].append(google_map_url)
+        if keyboard[0]:
+            results.append(InlineQueryResultArticle(id=uuid4(),
+                                                    title=place.get('name'),
+                                                    description=place.get('formatted_address'),
+                                                    input_message_content=InputTextMessageContent(
+                                                        format_response(place),
+                                                        parse_mode=ParseMode.MARKDOWN),
+                                                    reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard),
+                                                    thumb_url=place.get('icon')
+                                                    ))
     bot.answerInlineQuery(update.inline_query.id, results=results)
 
 
 def appendimage(bot, update):
     inline_message_id = update.chosen_inline_result.inline_message_id
+    print(inline_message_id)
 
 
 def find(bot, update):
