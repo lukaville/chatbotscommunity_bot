@@ -5,7 +5,7 @@ from places.providers.base import BasePlacesProvider
 SEARCH_RADIUS = 20000
 
 PLACES_API_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?key={key}&location={lat}%2C{lng}&query={query}&language=ru&radius={radius}"
-PLACE_DETAIL_API_URL = "https://maps.googleapis.com/maps/api/place/details/json?placeid={place_id}&key={key}"
+PLACE_DETAIL_API_URL = "https://maps.googleapis.com/maps/api/place/details/json?placeid={place_id}&key={key}&language=ru"
 
 
 class GooglePlacesProvider(BasePlacesProvider):
