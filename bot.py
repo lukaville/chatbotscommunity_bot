@@ -7,7 +7,7 @@ import re
 from places.places import get_places
 from telegram import InlineQueryResultArticle, ParseMode, \
     InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import Updater, InlineQueryHandler, CommandHandler
+from telegram.ext import Updater, InlineQueryHandler, CommandHandler, ChosenInlineResultHandler
 import logging
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -26,7 +26,7 @@ def escape_markdown(text):
 
 
 def format_response(response_object):
-    response = ('Название: {name} \n'
+    response = ('*{name}* \n'
                 'Адрес: {address} \n'
                 'Рейтинг: {rating}').format(name=response_object.get('name'),
                                             address=response_object.get('formatted_address'),
@@ -41,17 +41,26 @@ def inlinequery(bot, update):
 
     places = get_places(query, lat=query_object.location.latitude, lng=query_object.location.longitude)
     for place in places:
-        keyboard = [[InlineKeyboardButton(text='Test', url='google.com'), InlineKeyboardButton(text='No', url='ya.ru')]]
+        google_map_url = InlineKeyboardButton(text='На карте', url=place['url'])
+        if place.get('website'):
+            website = InlineKeyboardButton(text='Сайт', url=place['website'])
+            keyboard = [[google_map_url, website]]
+        else:
+            keyboard = [[google_map_url, ]]
         results.append(InlineQueryResultArticle(id=uuid4(),
                                                 title=place.get('name'),
                                                 description=place.get('formatted_address'),
                                                 input_message_content=InputTextMessageContent(
                                                     format_response(place),
                                                     parse_mode=ParseMode.MARKDOWN),
-                                                reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard)
+                                                reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard),
+                                                thumb_url=place.get('icon')
                                                 ))
-
     bot.answerInlineQuery(update.inline_query.id, results=results)
+
+
+def appendimage(bot, update):
+    inline_message_id = update.chosen_inline_result.inline_message_id
 
 
 def find(bot, update):
@@ -71,6 +80,7 @@ def main():
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(InlineQueryHandler(inlinequery))
+    dp.add_handler(ChosenInlineResultHandler(inlinequery))
 
     # log all errors
     dp.add_error_handler(error)
