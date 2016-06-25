@@ -28,7 +28,7 @@ class GooglePlacesProvider(BasePlacesProvider):
         r = requests.get(url)
         places = r.json()['results']
 
-        for place in places:
+        for place in places[:3]:
             detail_place = self.get_place(place['place_id'])
             place.update(detail_place)
 
