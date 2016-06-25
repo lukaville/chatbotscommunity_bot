@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
-
+import logging
+import re
 from uuid import uuid4
 
-import re
-
-from telegram import InlineQueryResultArticle, ParseMode, \
-    InputTextMessageContent
+from telegram import InlineQueryResultArticle, ParseMode, InputTextMessageContent
 from telegram.ext import Updater, InlineQueryHandler, CommandHandler
-import logging
 
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+)
 
 logger = logging.getLogger(__name__)
 
@@ -30,24 +27,33 @@ def inlinequery(bot, update):
     query = query_object.query
     print(query.location)
     results = []
-
-    results.append(InlineQueryResultArticle(id=uuid4(),
-                                            title="Caps",
-                                            input_message_content=InputTextMessageContent(
-                                                query.upper())))
-
-    results.append(InlineQueryResultArticle(id=uuid4(),
-                                            title="Bold",
-                                            input_message_content=InputTextMessageContent(
-                                                "*%s*" % escape_markdown(query),
-                                                parse_mode=ParseMode.MARKDOWN)))
-
-    results.append(InlineQueryResultArticle(id=uuid4(),
-                                            title="Italic",
-                                            input_message_content=InputTextMessageContent(
-                                                "_%s_" % escape_markdown(query),
-                                                parse_mode=ParseMode.MARKDOWN)))
-
+    results.append(
+        InlineQueryResultArticle(
+            id=uuid4(),
+            title="Caps",
+            input_message_content=InputTextMessageContent(query.upper())
+        )
+    )
+    results.append(
+        InlineQueryResultArticle(
+            id=uuid4(),
+            title="Bold",
+            input_message_content=InputTextMessageContent(
+                "*%s*" % escape_markdown(query),
+                parse_mode=ParseMode.MARKDOWN
+            )
+        )
+    )
+    results.append(
+        InlineQueryResultArticle(
+            id=uuid4(),
+            title="Italic",
+            input_message_content=InputTextMessageContent(
+                "_%s_" % escape_markdown(query),
+                parse_mode=ParseMode.MARKDOWN
+            )
+        )
+    )
     bot.answerInlineQuery(update.inline_query.id, results=results)
 
 
@@ -76,7 +82,7 @@ def main():
     # log all errors
     dp.add_error_handler(error)
 
-    # Start the Bot
+    # Start the Bo
     updater.start_polling()
 
     # Block until the user presses Ctrl-C or the process receives SIGINT,
