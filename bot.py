@@ -42,7 +42,8 @@ def inlinequery(bot, update):
     query_object = update.inline_query
     query = query_object.query
     results = []
-
+    if not query_object.location:
+        return []
     places = get_places(query, lat=query_object.location.latitude, lng=query_object.location.longitude)
     for place in places:
         keyboard = [[], []]
